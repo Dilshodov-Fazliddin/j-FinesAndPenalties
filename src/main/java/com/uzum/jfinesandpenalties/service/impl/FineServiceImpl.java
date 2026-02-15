@@ -6,7 +6,9 @@ import com.uzum.jfinesandpenalties.component.adapter.NotificationAdapter;
 import com.uzum.jfinesandpenalties.component.kafka.producer.KafkaFineProducer;
 import com.uzum.jfinesandpenalties.dto.event.FineCreatedEvent;
 import com.uzum.jfinesandpenalties.dto.request.FineRequest;
+import com.uzum.jfinesandpenalties.dto.request.FineUpdateRequest;
 import com.uzum.jfinesandpenalties.dto.response.FineResponse;
+import com.uzum.jfinesandpenalties.entity.FineEntity;
 import com.uzum.jfinesandpenalties.exception.DataNotFoundException;
 import com.uzum.jfinesandpenalties.mapper.FineMapper;
 import com.uzum.jfinesandpenalties.repository.FineRepository;
@@ -17,7 +19,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -70,5 +77,33 @@ public class FineServiceImpl implements FineService {
 
         log.info("notification send for {}", offender.email());
         return fineMapper.toResponse(fine);
+    }
+
+    @Override
+    public Page<FineResponse> getAllFine(Pageable pageable) {
+        var fineEntities = fineRepository.findAll(pageable);
+        return fineEntities.map(fineMapper::toResponse);
+    }
+
+    @Override
+    public FineResponse getFineById(Long id) {
+        var fineEntity = fineRepository
+                .findById(id)
+                .orElseThrow(() -> new DataNotFoundException("The fine with this id not found id:" + id));
+
+        return fineMapper.toResponse(fineEntity);
+    }
+
+
+    @Override
+    @Transactional
+    public void updateResponseById(Long id, FineUpdateRequest updateRequest) {
+        var fineEntity = fineRepository
+                .findById(id)
+                .orElseThrow(() -> new DataNotFoundException("The fine with this id not found id:" + id));
+
+        fineMapper.updateFineFromDto(updateRequest,fineEntity);
+
+        log.info("Fine with id: {}  updated to {}",id,updateRequest);
     }
 }

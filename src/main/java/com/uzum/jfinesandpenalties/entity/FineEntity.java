@@ -28,6 +28,7 @@ public class FineEntity extends BaseEntity {
     @Column(nullable = false)
     String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     FineType fineType;
 
@@ -38,6 +39,7 @@ public class FineEntity extends BaseEntity {
     Long articleId;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     FinesStatus fineStatus;
 
     @Column(nullable = false)
