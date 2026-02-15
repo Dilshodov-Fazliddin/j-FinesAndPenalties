@@ -8,6 +8,6 @@ public record GcpResponse(
         String citizenship,
         String personalIdentificationNumber,
         String passportNumber,
-        String mail
+        String email
 ) {
 }

@@ -6,19 +6,18 @@ import com.uzum.jfinesandpenalties.component.adapter.NotificationAdapter;
 import com.uzum.jfinesandpenalties.component.kafka.producer.KafkaFineProducer;
 import com.uzum.jfinesandpenalties.dto.event.FineCreatedEvent;
 import com.uzum.jfinesandpenalties.dto.request.FineRequest;
-import com.uzum.jfinesandpenalties.dto.response.ArticleResponse;
 import com.uzum.jfinesandpenalties.dto.response.FineResponse;
-import com.uzum.jfinesandpenalties.dto.response.GcpResponse;
-import com.uzum.jfinesandpenalties.entity.FineEntity;
+import com.uzum.jfinesandpenalties.exception.DataNotFoundException;
 import com.uzum.jfinesandpenalties.mapper.FineMapper;
+import com.uzum.jfinesandpenalties.repository.FineRepository;
+import com.uzum.jfinesandpenalties.repository.OfficerRepository;
 import com.uzum.jfinesandpenalties.service.FineService;
+import com.uzum.jfinesandpenalties.utils.MessageBuilder;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -31,25 +30,28 @@ public class FineServiceImpl implements FineService {
     GcpAdapter gcpAdapter;
     NotificationAdapter notificationAdapter;
     FineMapper fineMapper;
+    FineRepository fineRepository;
+    OfficerRepository officerRepository;
 
 
-    @Transactional
     @Override
     public FineResponse create(FineRequest fineRequest) {
-        log.info("qotpya kemadi");
+
         var articleResponse = courtAdapter.fetchArticleById(fineRequest.articleId());
-        log.info("galdi court response");
-
-        var user = gcpAdapter.getUser(fineRequest.OffenderPersonalIdentificationNumber());
-
-        log.info("galdi adapterresponse");
+        var offender = gcpAdapter.getUser(fineRequest.offenderPersonalIdentificationNumber());
+        var officerEntity = officerRepository
+                .findById(fineRequest.officerId())
+                .orElseThrow(() -> new DataNotFoundException("Officer with id: " + fineRequest.officerId() + "not found"));
 
         var fine = fineMapper.toEntity(fineRequest);
 
-        fine.setPassportNumber(user.passportNumber());
+        fine.setPassportNumber(offender.passportNumber());
         fine.setPenaltyAmount(articleResponse.fine());
+        fine.setOfficer(officerEntity);
 
-       // notificationAdapter.sendNotificationEmail(null, user.mail());
+        fine = fineRepository.save(fine);
+
+        log.info("fine saved to db fine id: {}", fine.getId());
 
         kafkaFineProducer.publishForFineCreatedTopic(
                 FineCreatedEvent
@@ -59,6 +61,14 @@ public class FineServiceImpl implements FineService {
                         .officerId(fineRequest.officerId())
                         .build());
 
+        log.info("sent to topic {}", fine.getId());
+
+        var message = MessageBuilder
+                .SEND_FINE_MESSAGE(fineRequest, fine.getPenaltyAmount(), officerEntity.getFirstName());
+
+        notificationAdapter.sendNotificationEmail(message, offender.email());
+
+        log.info("notification send for {}", offender.email());
         return fineMapper.toResponse(fine);
     }
 }

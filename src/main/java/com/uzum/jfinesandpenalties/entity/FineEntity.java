@@ -1,5 +1,6 @@
 package com.uzum.jfinesandpenalties.entity;
 
+import com.uzum.jfinesandpenalties.constant.enums.FineType;
 import com.uzum.jfinesandpenalties.constant.enums.FinesStatus;
 import com.uzum.jfinesandpenalties.entity.base.BaseEntity;
 import jakarta.persistence.*;
@@ -19,10 +20,16 @@ import lombok.experimental.SuperBuilder;
 public class FineEntity extends BaseEntity {
 
     @Column(nullable = false)
-    String OffenderPersonalIdentificationNumber;
+    String offenderPersonalIdentificationNumber;
 
     @Column(nullable = false)
     String name;
+
+    @Column(nullable = false)
+    String description;
+
+    @Column(nullable = false)
+    FineType fineType;
 
     @Column(nullable = false)
     String passportNumber;
