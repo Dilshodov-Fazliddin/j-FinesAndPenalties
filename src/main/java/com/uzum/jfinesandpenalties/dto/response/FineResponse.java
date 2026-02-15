@@ -9,8 +9,7 @@ public record FineResponse(
 
         Long articleId,
 
-        Long penaltyAmount,
+        Long penaltyAmount
 
-        Long officerId
 ) {
 }

@@ -1,21 +1,25 @@
 package com.uzum.jfinesandpenalties.dto.request;
 
+import com.uzum.jfinesandpenalties.constant.enums.FineType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 
 public record FineRequest(
-        @NotNull(message = "fine is blank")
+        @NotNull(message = "officer id is blank")
         Long officerId,
 
+        @NotNull(message = "Fine type is null")
+        FineType fineType,
+
+        @NotBlank(message = "description is blank")
+        String description,
+
         @NotBlank(message = "pid is null")
-        String OffenderPersonalIdentificationNumber,
+        String offenderPersonalIdentificationNumber,
 
         @NotBlank(message = "name is blank")
         String name,
-
-        @NotBlank(message = "passport number is blank")
-        String passportNumber,
 
         @NotNull(message = "Article id is blank")
         Long articleId
