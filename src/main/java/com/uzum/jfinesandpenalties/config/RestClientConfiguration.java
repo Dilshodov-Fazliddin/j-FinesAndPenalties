@@ -1,4 +1,4 @@
-package com.uzum.jfinesandpenalties.config.rest;
+package com.uzum.jfinesandpenalties.config;
 
 import com.uzum.jfinesandpenalties.handler.RestClientExceptionHandler;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;

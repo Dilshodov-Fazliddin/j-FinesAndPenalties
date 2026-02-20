@@ -12,14 +12,8 @@ public record FineRequest(
         @NotNull(message = "Fine type is null")
         FineType fineType,
 
-        @NotBlank(message = "description is blank")
-        String description,
-
         @NotBlank(message = "pid is null")
         String offenderPersonalIdentificationNumber,
-
-        @NotBlank(message = "name is blank")
-        String name,
 
         @NotNull(message = "Article id is blank")
         Long articleId

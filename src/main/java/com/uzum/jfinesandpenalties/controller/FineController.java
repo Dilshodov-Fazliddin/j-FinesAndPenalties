@@ -3,6 +3,7 @@ package com.uzum.jfinesandpenalties.controller;
 import com.uzum.jfinesandpenalties.dto.request.FineRequest;
 import com.uzum.jfinesandpenalties.dto.request.FineUpdateRequest;
 import com.uzum.jfinesandpenalties.dto.response.FineResponse;
+import com.uzum.jfinesandpenalties.dto.response.PageResponse;
 import com.uzum.jfinesandpenalties.service.FineService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -27,7 +28,7 @@ public class FineController {
     }
 
     @GetMapping
-    public Page<FineResponse> getAllFines(
+    public PageResponse<FineResponse> getAllFines(
             Pageable pageable
     ) {
         return fineService.getAllFine(pageable);

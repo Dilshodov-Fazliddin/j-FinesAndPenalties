@@ -1,12 +1,9 @@
 package com.uzum.jfinesandpenalties.constant;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.experimental.UtilityClass;
 
-public final class Constant {
-
-
-
-
-
-
+@UtilityClass
+public class Constant {
+    public static final String FINES_REDIS_KEYS = "fines";
+    public static final String OFFICER_REDIS_KEYS = "officer";
 }
