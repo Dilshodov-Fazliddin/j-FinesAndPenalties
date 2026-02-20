@@ -1,4 +1,4 @@
-package com.uzum.jfinesandpenalties.config.app;
+package com.uzum.jfinesandpenalties.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;

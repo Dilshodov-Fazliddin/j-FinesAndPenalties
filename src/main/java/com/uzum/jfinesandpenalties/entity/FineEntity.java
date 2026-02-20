@@ -23,7 +23,7 @@ public class FineEntity extends BaseEntity {
     String offenderPersonalIdentificationNumber;
 
     @Column(nullable = false)
-    String name;
+    String offenderName;
 
     @Column(nullable = false)
     String description;

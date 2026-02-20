@@ -1,8 +1,10 @@
 package com.uzum.jfinesandpenalties.component.kafka.producer;
 
+import com.uzum.jfinesandpenalties.component.adapter.NotificationAdapter;
 import com.uzum.jfinesandpenalties.constant.KafkaConstants;
 import com.uzum.jfinesandpenalties.dto.event.FineCreatedEvent;
 import com.uzum.jfinesandpenalties.dto.event.FinePaidEvent;
+import com.uzum.jfinesandpenalties.utils.MessageBuilder;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

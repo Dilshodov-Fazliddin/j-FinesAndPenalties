@@ -7,8 +7,12 @@ import com.uzum.jfinesandpenalties.component.kafka.producer.KafkaFineProducer;
 import com.uzum.jfinesandpenalties.dto.event.FineCreatedEvent;
 import com.uzum.jfinesandpenalties.dto.request.FineRequest;
 import com.uzum.jfinesandpenalties.dto.request.FineUpdateRequest;
+import com.uzum.jfinesandpenalties.dto.response.ArticleResponse;
 import com.uzum.jfinesandpenalties.dto.response.FineResponse;
+import com.uzum.jfinesandpenalties.dto.response.GcpResponse;
+import com.uzum.jfinesandpenalties.dto.response.PageResponse;
 import com.uzum.jfinesandpenalties.entity.FineEntity;
+import com.uzum.jfinesandpenalties.entity.OfficerEntity;
 import com.uzum.jfinesandpenalties.exception.DataNotFoundException;
 import com.uzum.jfinesandpenalties.mapper.FineMapper;
 import com.uzum.jfinesandpenalties.repository.FineRepository;
@@ -19,12 +23,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import static com.uzum.jfinesandpenalties.constant.Constant.FINES_REDIS_KEYS;
 
 @Slf4j
 @Service
@@ -40,52 +45,55 @@ public class FineServiceImpl implements FineService {
     FineRepository fineRepository;
     OfficerRepository officerRepository;
 
-
     @Override
+    @Transactional
     public FineResponse create(FineRequest fineRequest) {
 
         var articleResponse = courtAdapter.fetchArticleById(fineRequest.articleId());
+
         var offender = gcpAdapter.getUser(fineRequest.offenderPersonalIdentificationNumber());
+
         var officerEntity = officerRepository
                 .findById(fineRequest.officerId())
                 .orElseThrow(() -> new DataNotFoundException("Officer with id: " + fineRequest.officerId() + "not found"));
 
-        var fine = fineMapper.toEntity(fineRequest);
-
-        fine.setPassportNumber(offender.passportNumber());
-        fine.setPenaltyAmount(articleResponse.fine());
-        fine.setOfficer(officerEntity);
+        FineEntity fine = buildFine(fineRequest, articleResponse, offender, officerEntity);
 
         fine = fineRepository.save(fine);
 
         log.info("fine saved to db fine id: {}", fine.getId());
 
-        kafkaFineProducer.publishForFineCreatedTopic(
-                FineCreatedEvent
-                        .builder()
-                        .fineId(fine.getId())
-                        .articleId(articleResponse.id())
-                        .officerId(fineRequest.officerId())
-                        .build());
+        publishFineCreatedEvent(fine,articleResponse,fineRequest,offender.email());
 
         log.info("sent to topic {}", fine.getId());
 
-        var message = MessageBuilder
-                .SEND_FINE_MESSAGE(fineRequest, fine.getPenaltyAmount(), officerEntity.getFirstName());
-
-        notificationAdapter.sendNotificationEmail(message, offender.email());
 
         log.info("notification send for {}", offender.email());
         return fineMapper.toResponse(fine);
     }
 
     @Override
-    public Page<FineResponse> getAllFine(Pageable pageable) {
-        var fineEntities = fineRepository.findAll(pageable);
-        return fineEntities.map(fineMapper::toResponse);
+    @Cacheable(
+            value = FINES_REDIS_KEYS,
+            key = "'page:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            unless = "#result == null"
+    )
+    public PageResponse<FineResponse> getAllFine(Pageable pageable) {
+        var fine = fineRepository.findAll(pageable).map(fineMapper::toResponse);
+
+        return new PageResponse<>(
+                fine.getContent(),
+                fine.getTotalPages(),
+                fine.getSize(),
+                fine.getTotalElements()
+        );
     }
 
     @Override
+    @Cacheable(
+            value = FINES_REDIS_KEYS,
+            unless = "#result == null"
+    )
     public FineResponse getFineById(Long id) {
         var fineEntity = fineRepository
                 .findById(id)
@@ -105,5 +113,32 @@ public class FineServiceImpl implements FineService {
         fineMapper.updateFineFromDto(updateRequest,fineEntity);
 
         log.info("Fine with id: {}  updated to {}",id,updateRequest);
+    }
+
+    @Override
+    public FineEntity fetchById(Long id) {
+        return fineRepository.findById(id).orElseThrow(()->new DataNotFoundException("Offender not found"));
+    }
+
+    private FineEntity buildFine(FineRequest request, ArticleResponse article, GcpResponse offender, OfficerEntity officer) {
+        var fine = fineMapper.toEntity(request);
+        fine.setPenaltyAmount(article.fine());
+        fine.setPassportNumber(offender.passportNumber());
+        fine.setOffenderName(offender.name());
+        fine.setOfficer(officer);
+        fine.setDescription(request.fineType().getDescription());
+
+        return fine;
+    }
+
+    private void publishFineCreatedEvent(FineEntity fine, ArticleResponse article, FineRequest request,String email) {
+        kafkaFineProducer.publishForFineCreatedTopic(
+                FineCreatedEvent.builder()
+                        .fineId(fine.getId())
+                        .articleId(article.id())
+                        .officerId(request.officerId())
+                        .email(email)
+                        .build()
+        );
     }
 }

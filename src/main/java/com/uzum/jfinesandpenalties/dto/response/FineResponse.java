@@ -3,7 +3,7 @@ package com.uzum.jfinesandpenalties.dto.response;
 public record FineResponse(
         Long id,
 
-        String name,
+        String offenderName,
 
         String passportNumber,
 
