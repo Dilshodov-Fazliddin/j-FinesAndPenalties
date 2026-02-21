@@ -1,9 +1,7 @@
 package com.uzum.jfinesandpenalties.component.kafka.consumer;
 
 import com.uzum.jfinesandpenalties.component.adapter.NotificationAdapter;
-import com.uzum.jfinesandpenalties.constant.KafkaConstants;
 import com.uzum.jfinesandpenalties.dto.event.FineCreatedEvent;
-import com.uzum.jfinesandpenalties.dto.response.FineResponse;
 import com.uzum.jfinesandpenalties.entity.FineEntity;
 import com.uzum.jfinesandpenalties.exception.HttpServerException;
 import com.uzum.jfinesandpenalties.service.FineService;
@@ -12,9 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.stereotype.Component;
 
 import static com.uzum.jfinesandpenalties.constant.KafkaConstants.FINE_CREATED;
@@ -24,7 +20,7 @@ import static com.uzum.jfinesandpenalties.constant.KafkaConstants.GROUP_ID;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(makeFinal = true,level = AccessLevel.PRIVATE)
-public class KafkaFineConsumer {
+public class NotificationConsumer {
 
     NotificationAdapter notificationAdapter;
     FineService fineService;

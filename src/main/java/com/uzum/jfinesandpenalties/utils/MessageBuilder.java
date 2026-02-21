@@ -12,7 +12,6 @@ public class MessageBuilder {
                 "Тип штрафа: " + fine.getFineType() + "\n" +
                 "Описание: " + fine.getDescription() + "\n" +
                 "Статья: " + fine.getArticleId() + "\n\n" +
-                "Штраф выписан сотрудником: " + fine.getOfficer().getFirstName() + ".\n\n" +
                 "Пожалуйста, погасите штраф в ближайшее время.";
     }
 }
