@@ -8,5 +8,6 @@ public record FineCreatedEvent(
         Long articleId,
         Long penaltyAmount,
         Long officerId,
-        String email
+        String email,
+        String personalIdentificationNumber
 ) {}
