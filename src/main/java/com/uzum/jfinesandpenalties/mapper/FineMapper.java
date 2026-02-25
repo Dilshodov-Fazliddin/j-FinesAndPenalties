@@ -11,14 +11,10 @@ import org.mapstruct.*;
 public interface FineMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "fineStatus", constant = "CREATED")
-    @Mapping(target = "offenderName",ignore = true)
     FineEntity toEntity(FineRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateFineFromDto(FineUpdateRequest dto, @MappingTarget FineEntity entity);
 
     FineResponse toResponse(FineEntity entity);
-
-    PageResponse<FineResponse> toPageResponse(FineEntity entity);
-
 }

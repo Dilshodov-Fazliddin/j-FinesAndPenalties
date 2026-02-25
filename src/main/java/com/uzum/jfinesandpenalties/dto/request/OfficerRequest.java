@@ -1,5 +1,6 @@
 package com.uzum.jfinesandpenalties.dto.request;
 
+import com.uzum.jfinesandpenalties.constant.enums.Rank;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +18,7 @@ public record OfficerRequest(
         Integer age,
 
         @NotBlank(message = "Rank is required")
-        String rank,
+        Rank rank,
 
         @NotBlank(message = "Badge number is required")
         String budgeNumber,
