@@ -8,5 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface DecisionMapper {
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "decisionStatus", constant = "UN_PAID")
     DecisionEntity toEntity(DecisionCreatedEvent event);
 }

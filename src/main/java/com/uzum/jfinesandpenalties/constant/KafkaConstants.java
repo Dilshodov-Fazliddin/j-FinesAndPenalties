@@ -11,5 +11,6 @@ public class KafkaConstants {
     public static final String NOTIFICATION_GROUP_ID = "notification.service";
     public static final String COURT_GROUP_ID = "court.service";
     public static final String COURT_VIOLATION_GROUP_ID = "court.service.violation";
+    public static final String FINE_PAID_ID = "fine.paid";
 
 }

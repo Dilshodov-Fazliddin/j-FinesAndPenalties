@@ -15,7 +15,8 @@ public enum Error {
     METHOD_NOT_SUPPORTED_ERROR_CODE(10008, "Method not supported"),
     MISSING_REQUEST_HEADER_ERROR_CODE(10009, "Missing request header"),
     HTTP_SERVICE_ERROR_CODE(10010, "Service error code"),
-    HTTP_CLIENT_ERROR_CODE(10011, "Client error code");
+    HTTP_CLIENT_ERROR_CODE(10011, "Client error code"),
+    PAYMENT_ERROR(10012, "Payment Error");
 
     final int code;
     final String message;

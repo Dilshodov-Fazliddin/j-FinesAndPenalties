@@ -1,9 +1,12 @@
 package com.uzum.jfinesandpenalties.entity;
 
+import com.uzum.jfinesandpenalties.constant.enums.DecisionStatus;
 import com.uzum.jfinesandpenalties.constant.enums.DecisionType;
 import com.uzum.jfinesandpenalties.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -31,4 +34,8 @@ public class DecisionEntity extends BaseEntity {
 
     @Column(nullable = false)
     String judge;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    DecisionStatus decisionStatus;
 }
