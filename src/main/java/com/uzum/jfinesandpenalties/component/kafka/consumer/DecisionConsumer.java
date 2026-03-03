@@ -24,7 +24,8 @@ public class DecisionConsumer {
 
     @KafkaListener(
             topics = DECISION_CREATED,
-            groupId = COURT_GROUP_ID
+            groupId = COURT_GROUP_ID,
+            containerFactory = "decisionKafkaListenerFactory"
     )
     public void handleDecision(@Payload DecisionCreatedEvent event) {
         try {

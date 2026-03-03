@@ -1,6 +1,5 @@
 package com.uzum.jfinesandpenalties.config.kafka;
 
-import com.uzum.jfinesandpenalties.dto.event.DecisionCreatedEvent;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,8 +17,7 @@ import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.uzum.jfinesandpenalties.constant.KafkaConstants.DEFAULT_VALUE;
-import static com.uzum.jfinesandpenalties.constant.KafkaConstants.TRUSTED_PACKAGES;
+import static com.uzum.jfinesandpenalties.constant.KafkaConstants.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -54,6 +52,31 @@ public class KafkaConsumerConfig {
 
         factory.setConsumerFactory(consumerFactory());
 
+        return factory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, Object> decisionConsumerFactory() {
+
+        Map<String, Object> decisionProps = new HashMap<>();
+
+        decisionProps.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, TRUSTED_PACKAGES);
+        decisionProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        decisionProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        decisionProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        decisionProps.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        decisionProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
+        decisionProps.put(JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+        decisionProps.put(JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, DEFAULT_VALUE);
+        return new DefaultKafkaConsumerFactory<>(decisionProps);
+
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> decisionKafkaListenerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(decisionConsumerFactory());
         return factory;
     }
 }
