@@ -4,6 +4,7 @@ import com.uzum.jfinesandpenalties.component.adapter.NotificationAdapter;
 import com.uzum.jfinesandpenalties.constant.KafkaConstants;
 import com.uzum.jfinesandpenalties.dto.event.FineCreatedEvent;
 import com.uzum.jfinesandpenalties.dto.event.FinePaidEvent;
+import com.uzum.jfinesandpenalties.dto.event.TransactionEvent;
 import com.uzum.jfinesandpenalties.utils.MessageBuilder;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class KafkaFineProducer {
         log.info("Sent FineCreatedEvent: {}", event);
     }
 
-    public void publishForFinePaidEvent(FinePaidEvent event) {
+    public void publishForFinePaidEvent(TransactionEvent event) {
         kafkaTemplate.send(KafkaConstants.FINE_PAID, event);
         log.info("Sent FinePaidEvent: {}", event);
     }

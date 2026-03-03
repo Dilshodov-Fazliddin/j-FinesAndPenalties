@@ -1,6 +1,8 @@
 package com.uzum.jfinesandpenalties.service.impl;
 
 import com.uzum.jfinesandpenalties.dto.event.DecisionCreatedEvent;
+import com.uzum.jfinesandpenalties.entity.DecisionEntity;
+import com.uzum.jfinesandpenalties.exception.DataNotFoundException;
 import com.uzum.jfinesandpenalties.mapper.DecisionMapper;
 import com.uzum.jfinesandpenalties.repository.DecisionRepository;
 import com.uzum.jfinesandpenalties.service.DecisionService;
@@ -23,5 +25,11 @@ public class DecisionServiceImpl implements DecisionService {
     public void createDecision(DecisionCreatedEvent event) {
         var decision = decisionMapper.toEntity(event);
         decisionRepository.save(decision);
+    }
+
+    @Override
+    public DecisionEntity findById(Long id) {
+        return decisionRepository.findById(id).orElseThrow(
+                () -> new DataNotFoundException("Decision not found"));
     }
 }

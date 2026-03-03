@@ -30,21 +30,19 @@ spring:
     baseline-version: 0
     schemas: postgres
 
+
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: finesAndPenalties-service
-      auto-offset-reset: earliest
+      auto-offset-reset: latest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-        spring.json.use.type.headers: false
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      group-id: court.service
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        spring.json.add.type.headers: false
+        spring.json.add.type.headers: true
 
 server:
   port: 8089
@@ -53,11 +51,31 @@ server:
 url:
   j-court:
     ARTICLE_URL: ${ARTICLE-URL}
+    VIOLATION_URL: ${VIOLATION-URL}
   j-gcp:
     GET_USER_URL: ${GCP-URL}
   j-notification:
     SEND_EMAIL_URL: ${SEND_URL}
     MERCHANT_LOGIN: ${MERCHANT_LOGIN}
     MERCHANT_PASSWORD: ${MERCHANT_PASSWORD}
-    MERCHANT_ID: ${MERCHANT_ID}
+  j-bank:
+    TRANSACTION: ${TRANSACTION-URL}
 
+cache:
+    type: redis
+data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:1221}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_LETTUCE_MAX_ACTIVE:32}
+          max-idle: ${REDIS_POOL_LETTUCE_MAX_IDLE:16}
+          min-idle: ${REDIS_POOL_LETTUCE_MIN_IDLE:8}
+          max-wait: ${REDIS_POOL_LETTUCE_MAX_WAIT:2000}
+      database: 0
+      timeout: ${REDIS_CONNECT_TIMEOUT:2000}
+      default-ttl: ${REDIS_DEFAULT_TTL:30000}
+      finesTtl: ${REDIS_ORDER_TTL:5000}
+      officerTtl: ${REDIS_MERCHANT_TTL:5000}

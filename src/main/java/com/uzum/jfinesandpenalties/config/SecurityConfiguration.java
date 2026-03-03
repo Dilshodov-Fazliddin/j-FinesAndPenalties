@@ -25,6 +25,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requestsConfigurer -> requestsConfigurer
                         .requestMatchers(HttpMethod.POST,"/api/fines-penalties/officers").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/fines-penalties/transaction/pay").permitAll()
                         .anyRequest()
                         .authenticated())
                 .httpBasic(Customizer.withDefaults())
