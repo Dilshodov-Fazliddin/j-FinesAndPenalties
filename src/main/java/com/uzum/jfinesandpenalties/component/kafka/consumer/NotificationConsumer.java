@@ -11,10 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import static com.uzum.jfinesandpenalties.constant.KafkaConstants.FINE_CREATED;
-import static com.uzum.jfinesandpenalties.constant.KafkaConstants.GROUP_ID;
+import static com.uzum.jfinesandpenalties.constant.KafkaConstants.*;
 
 @Component
 @RequiredArgsConstructor
@@ -27,9 +27,9 @@ public class NotificationConsumer {
 
     @KafkaListener(
             topics = FINE_CREATED,
-            groupId = GROUP_ID
+            groupId = NOTIFICATION_GROUP_ID
     )
-    public void handleFineCreated(FineCreatedEvent event){
+    public void handleFineCreated(@Payload FineCreatedEvent event){
         try {
             FineEntity fine = fineService.fetchById(event.fineId());
 

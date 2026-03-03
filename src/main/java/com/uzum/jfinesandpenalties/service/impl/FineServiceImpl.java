@@ -22,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -67,6 +68,7 @@ public class FineServiceImpl implements FineService {
         return fineMapper.toResponse(fine);
     }
 
+
     @Override
     @Cacheable(
             value = FINES_REDIS_KEYS,
@@ -84,6 +86,7 @@ public class FineServiceImpl implements FineService {
         );
     }
 
+
     @Override
     @Cacheable(
             value = FINES_REDIS_KEYS
@@ -99,6 +102,7 @@ public class FineServiceImpl implements FineService {
 
     @Override
     @Transactional
+    @CacheEvict(value = FINES_REDIS_KEYS,key = "'fines:' + #id")
     public void updateResponseById(Long id, FineUpdateRequest updateRequest) {
         var fineEntity = fineRepository
                 .findById(id)
@@ -109,13 +113,16 @@ public class FineServiceImpl implements FineService {
         log.info("Fine with id: {}  updated to {}",id,updateRequest);
     }
 
+
     @Override
     public FineEntity fetchById(Long id) {
         return fineRepository.findById(id).orElseThrow(()->new DataNotFoundException("Fine not found"));
     }
 
+
     private FineEntity buildFine(FineRequest request, ArticleResponse article, GcpResponse offender, OfficerEntity officer) {
         var fine = fineMapper.toEntity(request);
+
         fine.setPenaltyAmount(article.fine());
         fine.setPassportNumber(offender.passportNumber());
         fine.setOffenderName(offender.name());
@@ -124,6 +131,7 @@ public class FineServiceImpl implements FineService {
 
         return fine;
     }
+
 
     private void publishFineCreatedEvent(FineEntity fine, ArticleResponse article, FineRequest request,String email) {
         if (email != null) {

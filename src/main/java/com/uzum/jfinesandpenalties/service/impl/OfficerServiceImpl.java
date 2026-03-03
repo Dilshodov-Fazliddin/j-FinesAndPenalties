@@ -11,6 +11,7 @@ import com.uzum.jfinesandpenalties.service.OfficerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class OfficerServiceImpl implements OfficerService {
         return officerMapper.toResponse(saved);
     }
 
+
     @Override
     @Cacheable(
             value = OFFICER_REDIS_KEYS
@@ -49,8 +51,10 @@ public class OfficerServiceImpl implements OfficerService {
         return officerMapper.toResponse(officer);
     }
 
+
     @Override
     @Transactional
+    @CacheEvict(value = OFFICER_REDIS_KEYS,key = "'officer:' + #id")
     public void updateById(Long id, OfficerUpdateRequest request) {
         var officer = officerRepository
                 .findById(id).orElseThrow(() -> new DataNotFoundException("Officer not found"));

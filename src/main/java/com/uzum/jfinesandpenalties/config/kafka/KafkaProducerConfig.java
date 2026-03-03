@@ -1,5 +1,7 @@
 package com.uzum.jfinesandpenalties.config.kafka;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,9 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
-    private String bootstrapServers;
+    String bootstrapServers;
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {

@@ -1,6 +1,6 @@
 package com.uzum.jfinesandpenalties.config.kafka;
 
-import com.uzum.jfinesandpenalties.constant.KafkaConstants;
+import com.uzum.jfinesandpenalties.dto.event.DecisionCreatedEvent;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,11 +14,11 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.uzum.jfinesandpenalties.constant.KafkaConstants.DEFAULT_VALUE;
 import static com.uzum.jfinesandpenalties.constant.KafkaConstants.TRUSTED_PACKAGES;
 
 @Configuration
@@ -38,6 +38,8 @@ public class KafkaConsumerConfig {
         props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
         props.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, TRUSTED_PACKAGES);
+        props.put(JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS, true);
+        props.put(JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, DEFAULT_VALUE);
         return props;
     }
 

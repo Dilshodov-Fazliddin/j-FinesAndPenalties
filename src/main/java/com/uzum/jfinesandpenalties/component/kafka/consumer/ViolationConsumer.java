@@ -4,20 +4,18 @@ package com.uzum.jfinesandpenalties.component.kafka.consumer;
 import com.uzum.jfinesandpenalties.component.adapter.CourtAdapter;
 import com.uzum.jfinesandpenalties.dto.event.FineCreatedEvent;
 import com.uzum.jfinesandpenalties.dto.request.ViolationRequest;
-import com.uzum.jfinesandpenalties.dto.response.FineResponse;
-import com.uzum.jfinesandpenalties.entity.FineEntity;
 import com.uzum.jfinesandpenalties.service.FineService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-import static com.uzum.jfinesandpenalties.constant.KafkaConstants.FINE_CREATED;
-import static com.uzum.jfinesandpenalties.constant.KafkaConstants.GROUP_ID;
+import static com.uzum.jfinesandpenalties.constant.KafkaConstants.*;
 
 @Component
 @RequiredArgsConstructor
@@ -31,9 +29,9 @@ public class ViolationConsumer {
 
     @KafkaListener(
             topics = FINE_CREATED,
-            groupId = "court-service"
+            groupId = COURT_VIOLATION_GROUP_ID
     )
-    public void handleViolationCreated(FineCreatedEvent event){
+    public void handleViolationCreated(@Payload FineCreatedEvent event){
         try {
 
             var fine = fineService.fetchById(event.fineId());

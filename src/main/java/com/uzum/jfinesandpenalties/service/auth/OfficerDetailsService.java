@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
-public class OfficerDetailService implements UserDetailsService {
+public class OfficerDetailsService implements UserDetailsService {
     OfficerRepository officerRepository;
 
     @Override
