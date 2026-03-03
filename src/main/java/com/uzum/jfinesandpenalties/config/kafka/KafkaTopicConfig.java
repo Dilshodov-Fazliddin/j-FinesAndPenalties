@@ -14,4 +14,6 @@ public class KafkaTopicConfig {
     public NewTopic FinesTopic() {
         return TopicBuilder.name(KafkaConstants.FINE_CREATED).partitions(3).replicas(1).build();
     }
+
+
 }

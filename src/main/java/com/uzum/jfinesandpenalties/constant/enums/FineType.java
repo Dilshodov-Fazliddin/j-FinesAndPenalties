@@ -1,8 +1,11 @@
 package com.uzum.jfinesandpenalties.constant.enums;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 @Getter
+@FieldDefaults(makeFinal = true,level = AccessLevel.PRIVATE)
 public enum FineType {
     SPEEDING( "Превышение скорости"),
     RED_LIGHT( "Проезд на красный свет"),
@@ -13,7 +16,7 @@ public enum FineType {
     MOBILE_WHILE_DRIVING( "Использование мобильного телефона за рулем"),
     UNLICENSED_DRIVING( "Управление без водительского удостоверения");
 
-    private final String description;
+    String description;
 
     FineType(String description) {
         this.description = description;

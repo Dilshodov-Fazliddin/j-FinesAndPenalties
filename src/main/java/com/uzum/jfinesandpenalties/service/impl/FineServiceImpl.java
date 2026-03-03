@@ -22,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,6 @@ public class FineServiceImpl implements FineService {
     KafkaFineProducer kafkaFineProducer;
     CourtAdapter courtAdapter;
     GcpAdapter gcpAdapter;
-    NotificationAdapter notificationAdapter;
     FineMapper fineMapper;
     FineRepository fineRepository;
     OfficerRepository officerRepository;
@@ -65,32 +65,31 @@ public class FineServiceImpl implements FineService {
 
         log.info("sent to topic {}", fine.getId());
 
-
-        log.info("notification send for {}", offender.email());
         return fineMapper.toResponse(fine);
     }
 
+
     @Override
     @Cacheable(
             value = FINES_REDIS_KEYS,
-            key = "'page:' + #pageable.pageNumber + ':' + #pageable.pageSize",
-            unless = "#result == null"
+            key = "'page:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
+            unless = "#result.content.isEmpty()"
     )
     public PageResponse<FineResponse> getAllFine(Pageable pageable) {
-        var fine = fineRepository.findAll(pageable).map(fineMapper::toResponse);
+        var fines = fineRepository.findAll(pageable).map(fineMapper::toResponse);
 
         return new PageResponse<>(
-                fine.getContent(),
-                fine.getTotalPages(),
-                fine.getSize(),
-                fine.getTotalElements()
+                fines.getContent(),
+                fines.getTotalPages(),
+                fines.getSize(),
+                fines.getTotalElements()
         );
     }
 
+
     @Override
     @Cacheable(
-            value = FINES_REDIS_KEYS,
-            unless = "#result == null"
+            value = FINES_REDIS_KEYS
     )
     public FineResponse getFineById(Long id) {
         var fineEntity = fineRepository
@@ -103,6 +102,7 @@ public class FineServiceImpl implements FineService {
 
     @Override
     @Transactional
+    @CacheEvict(value = FINES_REDIS_KEYS,key = "'fines:' + #id")
     public void updateResponseById(Long id, FineUpdateRequest updateRequest) {
         var fineEntity = fineRepository
                 .findById(id)
@@ -113,13 +113,16 @@ public class FineServiceImpl implements FineService {
         log.info("Fine with id: {}  updated to {}",id,updateRequest);
     }
 
+
     @Override
     public FineEntity fetchById(Long id) {
-        return fineRepository.findById(id).orElseThrow(()->new DataNotFoundException("Offender not found"));
+        return fineRepository.findById(id).orElseThrow(()->new DataNotFoundException("Fine not found"));
     }
+
 
     private FineEntity buildFine(FineRequest request, ArticleResponse article, GcpResponse offender, OfficerEntity officer) {
         var fine = fineMapper.toEntity(request);
+
         fine.setPenaltyAmount(article.fine());
         fine.setPassportNumber(offender.passportNumber());
         fine.setOffenderName(offender.name());
@@ -129,14 +132,20 @@ public class FineServiceImpl implements FineService {
         return fine;
     }
 
+
     private void publishFineCreatedEvent(FineEntity fine, ArticleResponse article, FineRequest request,String email) {
-        kafkaFineProducer.publishForFineCreatedTopic(
-                FineCreatedEvent.builder()
-                        .fineId(fine.getId())
-                        .articleId(article.id())
-                        .officerId(request.officerId())
-                        .email(email)
-                        .build()
-        );
+        if (email != null) {
+            kafkaFineProducer.publishForFineCreatedTopic(
+                    FineCreatedEvent.builder()
+                            .fineId(fine.getId())
+                            .articleId(article.id())
+                            .officerId(request.officerId())
+                            .email(email)
+                            .build()
+            );
+            log.info("Sent fineCreatedEvent to Kafka, fineId: {}", fine.getId());
+        } else {
+            log.warn("Offender email is null, event not sent for fineId: {}", fine.getId());
+        }
     }
 }
