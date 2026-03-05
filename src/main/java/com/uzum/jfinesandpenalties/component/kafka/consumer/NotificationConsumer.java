@@ -38,7 +38,7 @@ public class NotificationConsumer {
             notificationAdapter.sendNotification(message, event.email());
 
             log.info("Notification sent to {}", event.email());
-        }catch (HttpServerException e){
+        } catch (HttpServerException e){
 
             log.info("Unexpected error: {}", e.getMessage());
 
